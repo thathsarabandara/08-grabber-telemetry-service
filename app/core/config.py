@@ -1,9 +1,17 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings
+from typing import Optional
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Grabber Service"
-    DATABASE_URL: str = "mysql+pymysql://user:password@localhost/dbname"
+    PROJECT_NAME: str = "Telemetry Service"
+    PORT: int = 8003
+    DATABASE_URL: str
     
-    model_config = SettingsConfigDict(env_file=".env")
+    MQTT_BROKER: str = "host.docker.internal"
+    MQTT_PORT: int = 1883
+    MQTT_USERNAME: Optional[str] = None
+    MQTT_PASSWORD: Optional[str] = None
+
+    class Config:
+        env_file = ".env"
 
 settings = Settings()
