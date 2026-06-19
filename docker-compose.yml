@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  api:
+  telemetry-service:
     build: .
     ports:
       - "8003:8003"
@@ -10,3 +10,10 @@ services:
     volumes:
       - .:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
+    networks:
+      - api_gateway_network
+
+networks:
+  api_gateway_network:
+    external: true
+    name: 05-grabber-api-gateway_default
