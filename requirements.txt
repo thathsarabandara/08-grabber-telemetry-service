@@ -8,3 +8,5 @@ aiomysql>=0.2.0
 aiomqtt>=2.0.0
 websockets>=12.0
 sqlmodel>=0.0.16
+python-multipart>=0.0.9
+httpx>=0.27.0
