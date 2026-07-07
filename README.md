@@ -241,13 +241,13 @@ docker compose up -d --build
 
 | Repository | Purpose |
 |---|---|
-| [`01-grabber-architecture`](../01-grabber-architecture) | System blueprints, MQTT schemas, and database designs |
-| [`02-grabber-firmware`](../02-grabber-firmware) | ESP32 controller and ESP32-CAM stream endpoints |
-| [`03-grabber-mobile-app`](../03-grabber-mobile-app) | Flutter app remote teleoperation HUD |
-| [`05-grabber-api-gateway`](../05-grabber-api-gateway) | Inbound router proxying app REST & WebSocket requests |
-| [`06-grabber-auth-service`](../06-grabber-auth-service) | Service managing user profiles, image updates, and JWT sessions |
-| [`07-grabber-robot-service`](../07-grabber-robot-service) | Service processing joint commands and homing schedules |
-| [`09-grabber-ai-service`](../09-grabber-ai-service) | Engine orchestrating autonomous sorting tasks and YOLO models |
+| [`01-grabber-architecture`](https://github.com/thathsarabandara/01-grabber-architecture) | System blueprints, MQTT schemas, and database designs |
+| [`02-grabber-firmware`](https://github.com/thathsarabandara/02-grabber-firmware) | ESP32 controller and ESP32-CAM stream endpoints |
+| [`03-grabber-mobile-app`](https://github.com/thathsarabandara/03-grabber-mobile-app) | Flutter app remote teleoperation HUD |
+| [`05-grabber-api-gateway`](https://github.com/thathsarabandara/05-grabber-api-gateway) | Inbound router proxying app REST & WebSocket requests |
+| [`06-grabber-auth-service`](https://github.com/thathsarabandara/06-grabber-auth-service) | Service managing user profiles, image updates, and JWT sessions |
+| [`07-grabber-robot-service`](https://github.com/thathsarabandara/07-grabber-robot-service) | Service processing joint commands and homing schedules |
+| [`09-grabber-ai-service`](https://github.com/thathsarabandara/09-grabber-ai-service) | Engine orchestrating autonomous sorting tasks and YOLO models |
 
 ---
 
