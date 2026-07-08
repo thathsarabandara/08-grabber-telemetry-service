@@ -70,7 +70,7 @@ async def fetch_frame_from_camera(url: str) -> bytes:
                         start = buffer.find(b"\xff\xd8")
                         end = buffer.find(b"\xff\xd9", start) if start != -1 else -1
                         if start != -1 and end != -1:
-                            return buffer[start:end+2]
+                            return buffer[start:end + 2]
                     raise Exception("Could not find JPEG frame in stream")
                 else:
                     return await response.aread()
@@ -233,7 +233,7 @@ async def delete_media(media_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     if os.path.exists(file_path):
         try:
             os.remove(file_path)
-        except Exception as e:
+        except Exception:
             pass
             
     await db.delete(item)

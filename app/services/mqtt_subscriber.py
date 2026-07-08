@@ -3,7 +3,7 @@ import json
 import logging
 from datetime import datetime
 import aiomqtt
-from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.config import settings
 from app.core.db import async_session_maker
 from app.models.telemetry import TelemetryRecord
