@@ -1,16 +1,17 @@
 import os
-import pytest
-import pytest_asyncio
-import asyncio
-from unittest.mock import AsyncMock, patch
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.pool import NullPool
-from sqlmodel import SQLModel
-import httpx
 
 # Set DATABASE_URL env var before importing anything from app
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///./test_temp.db"
+
+import pytest  # noqa: E402
+import pytest_asyncio  # noqa: E402
+import asyncio  # noqa: E402
+from unittest.mock import AsyncMock, patch  # noqa: E402
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine  # noqa: E402
+from sqlalchemy.orm import sessionmaker  # noqa: E402
+from sqlalchemy.pool import NullPool  # noqa: E402
+from sqlmodel import SQLModel  # noqa: E402
+import httpx  # noqa: E402
 
 # Import app.core.db first to overwrite its engine
 import app.core.db  # noqa: E402
