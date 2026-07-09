@@ -2,10 +2,9 @@ pipeline {
     agent any
 
     environment {
-        // Registry configurations (override these in Jenkins environment or UI params if needed)
         REGISTRY_CREDENTIALS_ID = 'docker-registry-credentials'
-        REGISTRY_URL            = '' // Leave empty for Docker Hub, or specify e.g., '123456789012.dkr.ecr.us-east-1.amazonaws.com'
-        IMAGE_NAME              = 'grabber-auth-service'
+        DOCKER_HUB_USER         = 'thathsarabandara'
+        IMAGE_NAME              = "${DOCKER_HUB_USER}/grabber-telemetry-service"
         IMAGE_TAG               = "${env.BUILD_NUMBER}"
     }
 
@@ -14,6 +13,17 @@ pipeline {
             steps {
                 echo 'Checking out source code...'
                 checkout scm
+            }
+        }
+
+        stage('Environment Check') {
+            steps {
+                echo 'Verifying Python, pip, and Docker are available...'
+                sh '''
+                    python3 --version
+                    pip3 --version
+                    docker --version
+                '''
             }
         }
 
@@ -52,38 +62,28 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                echo 'Building Docker container image...'
-                script {
-                    def fullImageName = REGISTRY_URL ? "${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}" : "${IMAGE_NAME}:${IMAGE_TAG}"
-                    sh "docker build -t ${fullImageName} ."
-                }
+                echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
+                sh """
+                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                    docker tag  ${IMAGE_NAME}:${IMAGE_TAG} ${IMAGE_NAME}:latest
+                """
             }
         }
 
         stage('Docker Push') {
             steps {
-                echo 'Pushing Docker image to registry...'
-                script {
-                    def fullImageName = REGISTRY_URL ? "${REGISTRY_URL}/${IMAGE_NAME}:${IMAGE_TAG}" : "${IMAGE_NAME}:${IMAGE_TAG}"
-                    
-                    if (REGISTRY_URL.contains('ecr')) {
-                        // AWS ECR Push flow
-                        def region = REGISTRY_URL.split('\\.')[3] ?: 'us-east-1'
-                        withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: REGISTRY_CREDENTIALS_ID]]) {
-                            sh """
-                                aws ecr get-login-password --region ${region} | docker login --username AWS --password-stdin ${REGISTRY_URL}
-                                docker push ${fullImageName}
-                            """
-                        }
-                    } else {
-                        // Standard Docker Hub / Registry login & push
-                        withCredentials([usernamePassword(credentialsId: REGISTRY_CREDENTIALS_ID, usernameVariable: 'REGISTRY_USER', passwordVariable: 'REGISTRY_PASS')]) {
-                            sh """
-                                echo "${REGISTRY_PASS}" | docker login ${REGISTRY_URL ?: ''} -u "${REGISTRY_USER}" --password-stdin
-                                docker push ${fullImageName}
-                            """
-                        }
-                    }
+                echo "Pushing Docker image to Docker Hub: ${IMAGE_NAME}"
+                withCredentials([usernamePassword(
+                    credentialsId: REGISTRY_CREDENTIALS_ID,
+                    usernameVariable: 'REGISTRY_USER',
+                    passwordVariable: 'REGISTRY_PASS'
+                )]) {
+                    sh """
+                        echo "\${REGISTRY_PASS}" | docker login -u "\${REGISTRY_USER}" --password-stdin
+                        docker push ${IMAGE_NAME}:${IMAGE_TAG}
+                        docker push ${IMAGE_NAME}:latest
+                        echo "Pushed ${IMAGE_NAME}:${IMAGE_TAG} and ${IMAGE_NAME}:latest"
+                    """
                 }
             }
         }
@@ -91,14 +91,16 @@ pipeline {
 
     post {
         always {
-            echo 'Cleaning up workspace artifacts...'
+            echo 'Logging out from Docker registry...'
+            sh 'docker logout || true'
+            echo 'Cleaning up workspace...'
             cleanWs()
         }
         success {
-            echo 'Pipeline completed successfully!'
+            echo "Pipeline SUCCESS — ${IMAGE_NAME}:${IMAGE_TAG} is live on Docker Hub!"
         }
         failure {
-            echo 'Pipeline failed. Please inspect build console logs.'
+            echo 'Pipeline FAILED — check console output above for details.'
         }
     }
 }
