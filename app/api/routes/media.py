@@ -17,7 +17,7 @@ router = APIRouter()
 
 @router.get("/stream")
 async def proxy_camera_stream(camera_url: str):
-    client = httpx.AsyncClient(timeout=None)
+    client = httpx.AsyncClient(timeout=None)  # nosec B113 - no timeout required: live camera stream is indefinitely long
     try:
         req = client.build_request("GET", camera_url)
         response = await client.send(req, stream=True)
@@ -233,7 +233,7 @@ async def delete_media(media_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     if os.path.exists(file_path):
         try:
             os.remove(file_path)
-        except Exception:
+        except Exception:  # nosec B110 - intentional: ignore errors if file is already gone or locked during cleanup
             pass
             
     await db.delete(item)
