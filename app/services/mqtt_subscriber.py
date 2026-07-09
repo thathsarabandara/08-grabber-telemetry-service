@@ -75,7 +75,8 @@ async def mqtt_subscriber_task():
                     try:
                         payload_str = payload_bytes.decode("utf-8")
                         payload = json.loads(payload_str) if payload_str else {}
-                    except Exception:  # nosec B112 - intentional: skip malformed/non-UTF8 MQTT payloads to keep subscriber loop alive
+                    # Intentional: skip malformed/non-UTF8 MQTT payloads to keep subscriber loop alive
+                    except Exception:  # nosec B112
                         continue
                     
                     parts = topic.split("/")

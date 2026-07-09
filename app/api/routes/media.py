@@ -17,7 +17,8 @@ router = APIRouter()
 
 @router.get("/stream")
 async def proxy_camera_stream(camera_url: str):
-    client = httpx.AsyncClient(timeout=None)  # nosec B113 - no timeout required: live camera stream is indefinitely long
+    # No timeout required: live camera stream is indefinitely long
+    client = httpx.AsyncClient(timeout=None)  # nosec B113
     try:
         req = client.build_request("GET", camera_url)
         response = await client.send(req, stream=True)
