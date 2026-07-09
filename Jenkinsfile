@@ -2,23 +2,24 @@ pipeline {
     agent any
 
     environment {
-        REGISTRY_CREDENTIALS_ID = 'docker-registry-credentials'
-        DOCKER_HUB_USER         = 'thathsarabandara'
-        IMAGE_NAME              = "${DOCKER_HUB_USER}/grabber-telemetry-service"
-        IMAGE_TAG               = "${env.BUILD_NUMBER}"
+        GHCR_CREDENTIALS_ID = 'ghcr-credentials'
+        GITHUB_USER         = 'thathsarabandara'
+        IMAGE_NAME          = "ghcr.io/${GITHUB_USER}/grabber-telemetry-service"
+        IMAGE_TAG           = "${env.BUILD_NUMBER}"
     }
 
     stages {
+
         stage('Checkout') {
             steps {
-                echo 'Checking out source code...'
+                echo 'Checking out source code from SCM...'
                 checkout scm
             }
         }
 
-        stage('Environment Check') {
+        stage('Environment') {
             steps {
-                echo 'Verifying Python, pip, and Docker are available...'
+                echo 'Verifying runtime tools are available...'
                 sh '''
                     python3 --version
                     pip3 --version
@@ -29,7 +30,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                echo 'Setting up Python virtual environment and installing dependencies...'
+                echo 'Creating virtual environment and installing dependencies...'
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
@@ -41,7 +42,7 @@ pipeline {
 
         stage('Lint') {
             steps {
-                echo 'Running linting checks (flake8 & bandit)...'
+                echo 'Running static analysis (flake8) and security scan (bandit)...'
                 sh '''
                     . venv/bin/activate
                     flake8 app/ tests/ --count --statistics
@@ -50,9 +51,9 @@ pipeline {
             }
         }
 
-        stage('Unit Tests') {
+        stage('Test') {
             steps {
-                echo 'Running unit tests with coverage reporting...'
+                echo 'Running unit tests with coverage...'
                 sh '''
                     . venv/bin/activate
                     pytest --cov=app --cov-report=term-missing tests/
@@ -60,7 +61,7 @@ pipeline {
             }
         }
 
-        stage('Docker Build') {
+        stage('Build') {
             steps {
                 echo "Building Docker image: ${IMAGE_NAME}:${IMAGE_TAG}"
                 sh """
@@ -70,16 +71,16 @@ pipeline {
             }
         }
 
-        stage('Docker Push') {
+        stage('Push') {
             steps {
-                echo "Pushing Docker image to Docker Hub: ${IMAGE_NAME}"
+                echo "Pushing to GitHub Container Registry: ${IMAGE_NAME}"
                 withCredentials([usernamePassword(
-                    credentialsId: REGISTRY_CREDENTIALS_ID,
-                    usernameVariable: 'REGISTRY_USER',
-                    passwordVariable: 'REGISTRY_PASS'
+                    credentialsId: GHCR_CREDENTIALS_ID,
+                    usernameVariable: 'GHCR_USER',
+                    passwordVariable: 'GHCR_TOKEN'
                 )]) {
                     sh """
-                        echo "\${REGISTRY_PASS}" | docker login -u "\${REGISTRY_USER}" --password-stdin
+                        echo "\${GHCR_TOKEN}" | docker login ghcr.io -u "\${GHCR_USER}" --password-stdin
                         docker push ${IMAGE_NAME}:${IMAGE_TAG}
                         docker push ${IMAGE_NAME}:latest
                         echo "Pushed ${IMAGE_NAME}:${IMAGE_TAG} and ${IMAGE_NAME}:latest"
@@ -87,17 +88,16 @@ pipeline {
                 }
             }
         }
+
     }
 
     post {
         always {
-            echo 'Logging out from Docker registry...'
-            sh 'docker logout || true'
-            echo 'Cleaning up workspace...'
+            sh 'docker logout ghcr.io || true'
             cleanWs()
         }
         success {
-            echo "Pipeline SUCCESS — ${IMAGE_NAME}:${IMAGE_TAG} is live on Docker Hub!"
+            echo "Pipeline SUCCESS — ${IMAGE_NAME}:${IMAGE_TAG} is live on GHCR!"
         }
         failure {
             echo 'Pipeline FAILED — check console output above for details.'
