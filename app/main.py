@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.core.db import init_db
 from app.services.mqtt_subscriber import mqtt_subscriber_task
 from app.services.websocket_manager import manager
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # Ensure uploads/gallery directory exists
 UPLOAD_DIR = os.path.join("uploads", "gallery")
@@ -34,6 +35,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Prometheus Instrumentation
+Instrumentator().instrument(app).expose(app)
 
 # Mount gallery static files
 app.mount("/uploads/gallery", StaticFiles(directory=UPLOAD_DIR), name="gallery")
