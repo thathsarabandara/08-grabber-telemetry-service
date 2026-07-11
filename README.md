@@ -235,6 +235,18 @@ Build and run the container locally:
 docker compose up -d --build
 ```
 
+## ⚙️ CI/CD Pipeline
+
+This project uses **Jenkins** for Continuous Integration and Deployment.
+The pipeline consists of the following steps:
+- **Checkout**: Fetch source code from SCM.
+- **Environment**: Verify runtime tools (python3, pip3, docker).
+- **Install Dependencies**: Create virtual environment and install python dependencies.
+- **Lint**: Run static analysis (flake8) and security scan (bandit).
+- **Test**: Run unit tests with coverage (pytest).
+- **Build**: Build Docker image.
+- **Push**: Push to GitHub Container Registry (GHCR).
+
 ---
 
 ## 🔗 Related Grabber Repositories
