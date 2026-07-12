@@ -73,6 +73,9 @@ pipeline {
         }
 
         stage('Push') {
+            when {
+                branch 'main'
+            }
             steps {
                 echo "Pushing to GitHub Container Registry: ${IMAGE_NAME}"
                 withCredentials([usernamePassword(
